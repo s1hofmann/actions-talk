@@ -1,0 +1,299 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<title>reveal.js</title>
+
+	<link rel="stylesheet" href="css/reveal.css">
+	<link rel="stylesheet" href="css/theme/black.css">
+	<link rel="stylesheet" href="css/own.css">
+
+	<!-- Theme used for syntax highlighting of code -->
+	<link rel="stylesheet" href="lib/css/zenburn.css">
+
+	<!-- Printing and PDF exports -->
+	<script>
+		var link = document.createElement('link');
+		link.rel = 'stylesheet';
+		link.type = 'text/css';
+		link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+		document.getElementsByTagName('head')[0].appendChild(link);
+	</script>
+</head>
+
+<body>
+	<div class="reveal">
+		<div class="slides">
+			<section>
+				<h2>
+					<span class="firstchar">G</span>it
+					<span class="firstchar">H</span>ub
+					<span class="firstchar">A</span>ctions</h2>
+				<h4>by</h4>
+				<h3>Simon Hofmann</h3>
+				<h4>-</h4>
+				<h3>2019-02-20</h3>
+			</section>
+			<section>
+				<h1>Overview</h1>
+				<ul>
+					<li>Intro</li>
+					<li>How do GitHub Actions work?</li>
+					<li>What are GitHub Actions Good For?</li>
+					<li>act</li>
+					<li>Resources</li>
+				</ul>
+			</section>
+			<section>
+				<h1>Intro</h1>
+			</section>
+			<section>
+				<h2>GitHub Actions</h2>
+				<img class="snippet" src="img/action.png" alt="GitHub Actions">
+			</section>
+			<section>
+				<h2>GitHub Actions</h2>
+				<ul>
+					<li class="fragment">Allow to implement custom logic on GitHub</li>
+					<li class="fragment">Fully integrated, no external app required</li>
+					<li class="fragment">Graphical editor and / or text based editing</li>
+					<li class="fragment">Veeeeery flexible!</li>
+					<li class="fragment">Still invite only beta 😭</li>
+				</ul>
+			</section>
+			<section>
+				<h1>How do GitHub Actions work?</h1>
+			</section>
+			<section>
+				<h2>triggers</h2>
+				<ul>
+					<li class="fragment">Actions are triggered by GitHub events</li>
+					<ul>
+						<li class="fragment">create</li>
+						<li class="fragment">issue</li>
+						<li class="fragment">pull_request</li>
+						<li class="fragment">push</li>
+						<li class="fragment">and more...</li>
+					</ul>
+				</ul>
+			</section>
+			<section>
+				<h2>workflow</h2>
+				<ul>
+					<li class="fragment">Workflows map events to actions</li>
+					<li class="fragment">
+						Sample:
+						<pre>
+							<code data-trim data-noescape>
+								workflow "Build and deploy to gh-pages" {
+									on = "push"
+									resolves = [
+										"Deploy if on master",
+										"Test",
+										"Production build && Deploy",
+									]
+								}
+							</code>
+						</pre>
+					</li>
+				</ul>
+			</section>
+			<section>
+				<h2>resolves</h2>
+				<ul>
+					<li class="fragment">When a workflow executes, one or more actions may be resolved</li>
+					<li class="fragment">Resolving means to execute every (transitive) dependency of an action</li>
+					<li class="fragment">If one action fails, no subsequent actions will be executed</li>
+				</ul>
+			</section>
+			<section>
+				<h2>actions</h2>
+				<ul>
+					<li class="fragment">Working parts of a workflow</li>
+					<li class="fragment">Running in Docker containers</li>
+					<li class="fragment">Sample:
+						<pre>
+							<code data-trim data-noescape>
+								action "Production build && Deploy" {
+									uses = "docker://node:10"
+									needs = ["Deploy if on master"]
+									secrets = [
+										"DEPLOY_USER",
+										"GITHUB_TOKEN",
+									]
+									runs = "npm run deploy"
+								}
+							</code>
+						</pre>
+					</li>
+				</ul>
+			</section>
+			<section>
+				<h2>uses</h2>
+				<ul>
+					<li class="fragment">Specifies what to actually run</li>
+					<li class="fragment">Multiple sources supported</li>
+					<ul>
+						<li class="fragment">./path: Specifies the path to a Dockerfile in current repo</li>
+						<li class="fragment">owner/repo/path@ref: Reference another GitHub repo containing an action</li>
+						<li class="fragment">docker://image: References a Docker image</li>
+					</ul>
+				</ul>
+			</section>
+			<section>
+				<h2>needs</h2>
+				<ul>
+					<li class="fragment">Specifies dependencies</li>
+					<li class="fragment">Chains actions to form a "pipeline"</li>
+				</ul>
+			</section>
+			<section>
+				<h2>runs</h2>
+				<ul>
+					<li class="fragment">Specifies which command to run in the Docker container</li>
+					<li class="fragment">"ENTRYPOINT"</li>
+				</ul>
+			</section>
+			<section>
+				<h2>args</h2>
+				<ul>
+					<li class="fragment">Specifies which parameters to append to the "runs" command</li>
+					<li class="fragment">"CMD"</li>
+				</ul>
+			</section>
+			<section>
+				<h2>env</h2>
+				<ul>
+					<li class="fragment">Allows to configure container environment variables</li>
+					<li class="fragment">"ENV"</li>
+				</ul>
+			</section>
+			<section>
+				<h2>secrets</h2>
+				<ul>
+					<li class="fragment">Allows to inject secrets as environment variables</li>
+					<li class="fragment">Created via Web UI</li>
+					<li class="fragment">Stored encrypted, no plain-text passwords</li>
+				</ul>
+			</section>
+			<section>
+				<h1>What are GitHub Actions good for?</h1>
+			</section>
+			<section>
+				<h2>CI / CD</h2>
+				<ul>
+					<li class="fragment">Build and deploy to GitHub Pages</li>
+					<li class="fragment">Deploy to any (major) cloud provider</li>
+					<ul>
+						<li class="fragment">AWS, Azure, netlify, etc.</li>
+					</ul>
+					<li class="fragment">Publish artifacts</li>
+					<ul>
+						<li class="fragment">npm, Maven Central etc.</li>
+					</ul>
+				</ul>
+			</section>
+			<section>
+				<h2>Workflow automation</h2>
+				<ul>
+					<li class="fragment">Cleanup branches</li>
+					<li class="fragment">Apply labels</li>
+					<li class="fragment">Auto rebase</li>
+					<li class="fragment">Auto PR</li>
+					<li class="fragment">etc ...</li>
+				</ul>
+			</section>
+			<section>
+				<h2>Notifications</h2>
+				<ul>
+					<li class="fragment">Slack</li>
+					<li class="fragment">Twitter</li>
+					<li class="fragment">Email</li>
+					<li class="fragment">etc ...</li>
+				</ul>
+			</section>
+			<section>
+				<h1>act</h1>
+			</section>
+			<section>
+				<h2>act</h2>
+				<ul>
+					<li class="fragment">Run your GitHub Actions locally!</li>
+					<ul>
+						<li class="fragment">Run full workflow</li>
+						<li class="fragment">Or just single steps</li>
+					</ul>
+				</ul>
+			</section>
+			<section>
+				<h2>act</h2>
+				<ul>
+					<li class="fragment">Experiment locally!</li>
+					<ul>
+						<li class="fragment">Run default event (push)</li>
+						<li class="fragment">Or a specific one</li>
+					</ul>
+				</ul>
+			</section>
+			<section>
+				<h2>act</h2>
+				<img src="img/act.png" alt="act for GitHub Actions">
+			</section>
+			<section>
+				<h1>Resources</h1>
+				<ul>
+					<li><a href="https://developer.github.com/actions/">GitHub Actions Docs</a></li>
+					<li><a href="https://github.com/actions/workflow-parser/blob/master/language.md">GitHub Actions Language Spec</a></li>
+					<li><a href="https://github.com/actions">Official Actions Collection</a></li>
+					<li><a href="https://github.com/sdras/awesome-actions">Awesome GitHub Actions</a></li>
+					<li><a href="https://github.com/nektos/act">act</a></li>
+				</ul>
+			</section>
+			<section>
+				<h1>That's it!</h1>
+				<h3>Thank's for your attention!</h3>
+			</section>
+			<section>
+				<h1>Questions?</h1>
+				<h3>Or feedback?</h3>
+			</section>
+		</div>
+	</div>
+
+	<script src="lib/js/head.min.js"></script>
+	<script src="js/reveal.js"></script>
+
+	<script>
+		// More info about config & dependencies:
+		// - https://github.com/hakimel/reveal.js#configuration
+		// - https://github.com/hakimel/reveal.js#dependencies
+		Reveal.initialize({
+			dependencies: [{
+					src: 'plugin/markdown/marked.js'
+				},
+				{
+					src: 'plugin/markdown/markdown.js'
+				},
+				{
+					src: 'plugin/notes/notes.js',
+					async: true
+				},
+				{
+					src: 'plugin/highlight/highlight.js',
+					async: true,
+					callback: function () {
+						hljs.initHighlightingOnLoad();
+					}
+				}
+			]
+		});
+		Reveal.configure({
+			slideNumber: true
+		});
+	</script>
+</body>
+
+</html>
